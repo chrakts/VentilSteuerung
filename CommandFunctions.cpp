@@ -1,0 +1,231 @@
+/*
+ * CommandFunctions.cpp
+ *
+ * Created: 26.04.2017 14:54:45
+ *  Author: a16007
+ */
+
+#include "CommandFunctions.h"
+#include "External.h"
+#include "../Secrets/secrets.h"
+
+
+COMMAND cnetCommands[NUM_COMMANDS] =
+	{
+    cmultiStandardCommands,
+		{'P','i',CUSTOMER,NOPARAMETER,0,jobGetIDNumber},
+		{'P','s',CUSTOMER,NOPARAMETER,0,jobGetSerialNumber},
+		{'P','x',CUSTOMER,NOPARAMETER,0,jobGetIndex},
+		{'P','I',PRODUCTION,STRING,13,jobSetIDNumber},
+		{'P','S',PRODUCTION,STRING,13,jobSetSerialNumber},
+		{'P','X',PRODUCTION,STRING,3,jobSetIndexNumber},
+		{'C','t',CUSTOMER,NOPARAMETER,0,jobGetCTemperatureSensor},
+		{'C','h',CUSTOMER,NOPARAMETER,0,jobGetCHumiditySensor},
+		{'C','d',CUSTOMER,NOPARAMETER,0,jobGetCDewPointSensor},
+		{'C','a',CUSTOMER,NOPARAMETER,0,jobGetCAbsHumiditySensor},
+		{'L','a',CUSTOMER,NOPARAMETER,0,jobGetHeaterActualStatus},
+		{'L','s',CUSTOMER,NOPARAMETER,0,jobGetHeaterSetStatus},
+		{'L','L',CUSTOMER,UINT_8,1,jobSetHeater1OnValue},
+		{'L','H',CUSTOMER,UINT_8,1,jobSetHeater1HystValue},
+		{'L','S',CUSTOMER,STRING,8,jobSetHeaterSetStatus},
+		{'L','l',CUSTOMER,NOPARAMETER,0,jobGetHeater1OnValue},
+		{'L','h',CUSTOMER,NOPARAMETER,0,jobGetHeater1HystValue},
+		{'T','B',CUSTOMER,UINT_16,1,jobSetTimeBetweenBlocks},
+		{'T','S',CUSTOMER,UINT_16,1,jobSetTimeBetweenSensors},
+		{'T','W',CUSTOMER,UINT_16,1,jobWaitAfterLastSensor}
+	};
+
+
+
+void jobGetHeater1OnValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  if(address<NUMBER_OF_VENTS)
+    comRec->sendAnswerInt(function,address,job,u8HeatSwell[address],true);
+  else
+    comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobGetHeater1HystValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  if(address<NUMBER_OF_VENTS)
+    comRec->sendAnswerInt(function,address,job,u8HeatHysterese[address],true);
+  else
+    comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobGetHeaterSetStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  if(address<NUMBER_OF_VENTS)
+    cnet.sendStandard(heaterStatusStrings[u8HeatSetStatus[address]],BROADCAST,'L','1','s',true);
+  else
+    comRec->sendPureAnswer(function,address,job,false);
+
+}
+
+void jobGetHeaterActualStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  if(address<NUMBER_OF_VENTS)
+    comRec->sendAnswer(heaterStatusStrings[u8HeatActualStatus[address]],'L','1','a',true);
+  else
+    comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobSetHeater1OnValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  if(address<NUMBER_OF_VENTS)
+  {
+    u8HeatSwell[address] = ( (uint8_t*) pMem )[0];
+    comRec->Getoutput()->broadcastUInt8(u8HeatSwell[address],function,address,job);
+  }
+  else
+    comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobSetHeater1HystValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  if(address<NUMBER_OF_VENTS)
+  {
+    u8HeatHysterese[address] = ( (uint8_t*) pMem )[0];
+    comRec->Getoutput()->broadcastUInt8(u8HeatHysterese[address],function,address,job);
+  }
+  else
+    comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobSetHeaterSetStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+char *temp;
+	temp = (char*) pMem;
+	if(address<NUMBER_OF_VENTS)
+  {
+    switch(temp[0])
+    {
+      case 'a':
+        u8HeatSetStatus[address] = HEAT_STATUS_OFF;
+      break;
+      case 'e':
+        u8HeatSetStatus[address] = HEAT_STATUS_ON;
+      break;
+      case 'A':
+        u8HeatSetStatus[address] = HEAT_STATUS_AUTO;
+      break;
+    }
+    reportHeatSetStatus(comRec->Getoutput(),address);
+  }
+  else
+    comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobSetIDNumber(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	if (strlen((char*)pMem)<=11)
+	{
+		eeprom_write_block((char*)pMem,IDNumber,strlen((char*)pMem)+1);
+		comRec->sendPureAnswer(function,address,job,true);
+	}
+	else
+		comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobSetSerialNumber(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	if (strlen((char*)pMem)<=11)
+	{
+		eeprom_write_block((char*)pMem,SerialNumber,strlen((char*)pMem)+1);
+		comRec->sendPureAnswer(function,address,job,true);
+	}
+	else
+	comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobSetIndexNumber(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	if (strlen((char*)pMem)<=2)
+	{
+		eeprom_write_block((char*)pMem,IndexNumber,strlen((char*)pMem)+1);
+		comRec->sendPureAnswer(function,address,job,true);
+	}
+	else
+		comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobGetIDNumber(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	char temp[12];
+	eeprom_read_block(temp,IDNumber,12);
+	comRec->sendAnswer(temp,function,address,job,true);
+}
+
+void jobGetSerialNumber(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	char temp[12];
+	eeprom_read_block(temp,SerialNumber,12);
+	comRec->sendAnswer(temp,function,address,job,true);
+}
+
+void jobGetIndex(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	char temp[2];
+	eeprom_read_block(temp,IndexNumber,2);
+	comRec->sendAnswer(temp,function,address,job,true);
+}
+
+void jobGetCTemperatureSensor(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+char answer[20]="";
+
+	sprintf(answer,"%f",(double)fTemperatur);
+	comRec->sendAnswer(answer,function,address,job,true);
+}
+
+void jobGetCHumiditySensor(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	char answer[20]="";
+
+	sprintf(answer,"%f",(double)fHumidity);
+	comRec->sendAnswer(answer,function,address,job,true);
+}
+
+void jobGetCAbsHumiditySensor(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	char answer[20]="";
+
+	sprintf(answer,"%f",(double)fAbsHumitdity);
+	comRec->sendAnswer(answer,function,address,job,true);
+}
+
+void jobGetCDewPointSensor(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	char answer[20]="";
+
+	sprintf(answer,"%f",(double)fDewPoint);
+	comRec->sendAnswer(answer,function,address,job,true);
+}
+
+void jobSetTimeBetweenBlocks(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	actReportBetweenBlocks = ( (uint16_t*) pMem )[0];
+	comRec->sendAnswerInt(function,address,job,actReportBetweenBlocks,true);
+}
+
+void jobSetTimeBetweenSensors(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	actReportBetweenSensors = ( (uint16_t*) pMem )[0];
+	comRec->sendAnswerInt(function,address,job,actReportBetweenSensors,true);
+}
+
+void jobWaitAfterLastSensor(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	actWaitAfterLastSensor = ( (uint16_t*) pMem )[0];
+	comRec->sendAnswerInt(function,address,job,actWaitAfterLastSensor,true);
+}
+
+void reportHeatSetStatus(Communication *com, uint8_t address)
+{
+  com->sendStandard(heaterStatusStrings[u8HeatSetStatus[address]],BROADCAST,'V','1','s','T');
+}
+
+void reportHeatActualStatus(Communication *com, uint8_t address)
+{
+  com->sendStandard(heaterStatusStrings[u8HeatActualStatus[address]],BROADCAST,'V','1','a','T');
+}

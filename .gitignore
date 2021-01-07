@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+-ffunction-sections
+
+sig.txt
+
+VentilSteuerung.depend
+
+VentilSteuerung.layout
