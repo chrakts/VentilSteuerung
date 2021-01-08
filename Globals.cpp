@@ -35,21 +35,24 @@ volatile double fTemperatur=-999,fHumidity=-999,fDewPoint=-999,fAbsHumitdity=-99
 
 
 
-volatile uint8_t u8HeatSwell[NUMBER_OF_VENTS],u8HeatHysterese[NUMBER_OF_VENTS];
+volatile uint8_t u8HeatSwell[NUMBER_OF_VENTS],u8HeatNightSwell[NUMBER_OF_VENTS],u8HeatHysterese[NUMBER_OF_VENTS];
 volatile uint8_t u8HeatSetStatus[NUMBER_OF_VENTS],u8HeatActualStatus[NUMBER_OF_VENTS],u8HeatActualStatusOld[NUMBER_OF_VENTS];
 
-volatile uint8_t u8oldHeatSwell[NUMBER_OF_VENTS],u8oldHeatHysterese[NUMBER_OF_VENTS],u8oldHeatSetStatus[NUMBER_OF_VENTS];
+volatile uint8_t u8oldHeatSwell[NUMBER_OF_VENTS],u8oldHeatNightSwell[NUMBER_OF_VENTS],u8oldHeatHysterese[NUMBER_OF_VENTS],u8oldHeatSetStatus[NUMBER_OF_VENTS];
 
-uint8_t EEMEM ee_u8HeatSwell[NUMBER_OF_VENTS],ee_u8HeatHysterese[NUMBER_OF_VENTS];
+uint8_t EEMEM ee_u8HeatSwell[NUMBER_OF_VENTS],ee_u8HeatNightSwell[NUMBER_OF_VENTS],ee_u8HeatHysterese[NUMBER_OF_VENTS];
 uint8_t EEMEM ee_u8FanSetStatus[NUMBER_OF_VENTS];
 
 
 volatile uint8_t statusSensoren = KLIMASENSOR;
-volatile uint8_t statusReport = TEMPREPORT;
-volatile bool    sendStatusReport = false;
+volatile uint8_t statusReport = FIRSTREPORT;
+volatile bool    sendStatusReport = true;
 volatile uint8_t statusKlima = NOTHING_CLIMA_TODO;
 volatile uint8_t statusLastSensor = NOTHING_LAST_TODO;
 volatile uint8_t statusTemperature=NOTHING_TODO;
+
+volatile char strStatusNachtabsenkung[5];
+volatile bool statusNachtabsenkung=false;
 
 int errno;      // Globale Fehlerbehandlung
 
@@ -63,7 +66,7 @@ uint8_t actNumberSensors = 0;
 volatile bool nextSendReady=false;
 
 Communication cnet(0,Node,5,true);
-ComReceiver cnetRec(&cnet,Node,cnetCommands,NUM_COMMANDS,NULL,0,NULL,NULL);
+ComReceiver cnetRec(&cnet,Node,cnetCommands,NUM_COMMANDS,information,NUM_INFORMATION,NULL,NULL);
 
 /* Global variables for TWI */
 TWI_MasterDriver_t twiC_Master;    /*!< TWI master module. */

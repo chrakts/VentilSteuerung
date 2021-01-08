@@ -38,3 +38,19 @@ sig.txt
 VentilSteuerung.depend
 
 VentilSteuerung.layout
+
+bin/Release/VentilSteuerung.eep
+
+bin/Release/VentilSteuerung.elf
+
+bin/Release/VentilSteuerung.hex
+
+bin/Release/VentilSteuerung.lock
+
+bin/Release/VentilSteuerung.lss
+
+bin/Release/VentilSteuerung.map
+
+bin/Release/VentilSteuerung.sig
+
+VentilSteuerung.cscope_file_list

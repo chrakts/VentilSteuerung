@@ -38,6 +38,7 @@ void setup()
   for(i=0;i<NUMBER_OF_VENTS;i++)
   {
     u8HeatSwell[i]           = 35;
+    u8HeatNightSwell[i]      = 25;
     u8HeatHysterese[i]       = 3;
     u8HeatSetStatus[i]       = HEAT_STATUS_AUTO;
     u8HeatActualStatus[i]    = HEAT_STATUS_ON;
@@ -58,6 +59,7 @@ void setup()
 int main(void)
 {
 uint8_t reportStarted = false;
+static uint8_t DS18B20ToReport = 0;
 
 	setup();
 
@@ -69,10 +71,10 @@ uint8_t reportStarted = false;
  	setup_twi();
 
 	uint8_t sensorReady=SENSOR_READY;
-	MAX7328 maxTest(&twiE_Master,I2C_EXTENDER_ADDRESS);
-  maxTest.newValue(0xff);
-  while(!TWI_MasterReady(&twiE_Master))
-    ;
+	//MAX7328 maxTest(&twiE_Master,I2C_EXTENDER_ADDRESS);
+  //maxTest.newValue(0xff);
+
+  LEDGRUEN_ON;
 
 #ifdef KLIMASENSOR
   humiSensor.begin(&twiE_Master);
@@ -90,8 +92,17 @@ uint8_t reportStarted = false;
     {
       if(u8HeatSetStatus[i]!=HEAT_STATUS_AUTO)
         u8HeatActualStatus[i] = u8HeatSetStatus[i];
-      else // FAN = Auto
+      else // Heat = Auto
       {
+        uint8_t swell = u8HeatSwell[i];
+        if(statusNachtabsenkung)
+          swell = u8HeatNightSwell[i];
+        if(u8HeatActualStatus[i]==HEAT_STATUS_ON)
+          swell += u8HeatHysterese[i];
+        if(tempSensors[i]->getMeanTemperature()>swell)
+          u8HeatActualStatus[i]=HEAT_STATUS_OFF;
+        else
+          u8HeatActualStatus[i]=HEAT_STATUS_ON;
       }
 
     }
@@ -126,7 +137,6 @@ uint8_t reportStarted = false;
         sensorReady = doTemperature();
       break;
 			case LASTSENSOR:
-				LEDROT_OFF;
 				sensorReady = doLastSensor();
 			break;
 		}
@@ -151,6 +161,9 @@ uint8_t reportStarted = false;
         MyTimers[TIMER_REPORT].state = TM_START;
         switch(statusReport)
         {
+          case FIRSTREPORT:
+          break;
+
 #ifdef KLIMASENSOR
             case TEMPREPORT:
                 LEDGRUEN_ON;
@@ -170,6 +183,26 @@ uint8_t reportStarted = false;
                 cnet.sendStandard(buffer,BROADCAST,'C','1','d','F');
             break;
 #endif // KLIMASENSOR
+            case DS18B20REPORT:
+                if(actNumberSensors>0)
+                {
+                    sprintf(buffer,"%f",(double)(tempSensors[DS18B20ToReport]->getMeanTemperature()));
+                    cnet.sendStandard(buffer,BROADCAST,'T',int('a')+DS18B20ToReport,'t','F');
+                    DS18B20ToReport++;
+                }
+                else
+                {
+                    DS18B20ToReport=255;
+                }
+                if(DS18B20ToReport>=actNumberSensors)
+                {
+                    DS18B20ToReport = 0;
+                }
+                else
+                {
+                    statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Sensornummer abläuft
+                }
+            break;
             case LASTREPORT:
                 LEDGRUEN_OFF;
                 MyTimers[TIMER_REPORT].value = actReportBetweenBlocks;
@@ -264,8 +297,6 @@ bool noError;
     break;
 
 		case START_CONVERSION: //
-			LEDROT_ON;
-
 			noError=humiSensor.startMeasure();
 			if (noError==true)
 			{

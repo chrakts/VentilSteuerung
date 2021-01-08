@@ -85,7 +85,7 @@ void nextReportStatus(uint8_t test)
 	sendStatusReport = true;
 	statusReport+=1;
 	if( statusReport > LASTREPORT )
-        statusReport = TEMPREPORT;
+        statusReport = FIRSTREPORT;
 }
 
 

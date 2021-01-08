@@ -9,6 +9,10 @@
 #include "External.h"
 #include "../Secrets/secrets.h"
 
+INFORMATION information[NUM_INFORMATION]=
+{
+  {"DT",'t','1','N',STRING,3,(void*)strStatusNachtabsenkung,gotStatusNachtabsenkung},
+};
 
 COMMAND cnetCommands[NUM_COMMANDS] =
 	{
@@ -23,40 +27,55 @@ COMMAND cnetCommands[NUM_COMMANDS] =
 		{'C','h',CUSTOMER,NOPARAMETER,0,jobGetCHumiditySensor},
 		{'C','d',CUSTOMER,NOPARAMETER,0,jobGetCDewPointSensor},
 		{'C','a',CUSTOMER,NOPARAMETER,0,jobGetCAbsHumiditySensor},
-		{'L','a',CUSTOMER,NOPARAMETER,0,jobGetHeaterActualStatus},
-		{'L','s',CUSTOMER,NOPARAMETER,0,jobGetHeaterSetStatus},
-		{'L','L',CUSTOMER,UINT_8,1,jobSetHeater1OnValue},
-		{'L','H',CUSTOMER,UINT_8,1,jobSetHeater1HystValue},
-		{'L','S',CUSTOMER,STRING,8,jobSetHeaterSetStatus},
-		{'L','l',CUSTOMER,NOPARAMETER,0,jobGetHeater1OnValue},
-		{'L','h',CUSTOMER,NOPARAMETER,0,jobGetHeater1HystValue},
+		{'V','a',CUSTOMER,NOPARAMETER,0,jobGetHeaterActualStatus},
+		{'V','s',CUSTOMER,NOPARAMETER,0,jobGetHeaterSetStatus},
+		{'V','D',CUSTOMER,UINT_8,1,jobSetHeaterOnValue},
+		{'V','N',CUSTOMER,UINT_8,1,jobSetHeaterOnNightValue},
+		{'V','H',CUSTOMER,UINT_8,1,jobSetHeaterHystValue},
+		{'V','S',CUSTOMER,STRING,8,jobSetHeaterSetStatus},
+		{'V','l',CUSTOMER,NOPARAMETER,0,jobGetHeaterOnValue},
+		{'V','h',CUSTOMER,NOPARAMETER,0,jobGetHeaterHystValue},
 		{'T','B',CUSTOMER,UINT_16,1,jobSetTimeBetweenBlocks},
 		{'T','S',CUSTOMER,UINT_16,1,jobSetTimeBetweenSensors},
 		{'T','W',CUSTOMER,UINT_16,1,jobWaitAfterLastSensor}
 	};
 
-
-
-void jobGetHeater1OnValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+void gotStatusNachtabsenkung()
 {
-  if(address<NUMBER_OF_VENTS)
-    comRec->sendAnswerInt(function,address,job,u8HeatSwell[address],true);
+	if(strStatusNachtabsenkung[1]=='n')
+	  statusNachtabsenkung = true;
+  else
+	  statusNachtabsenkung = false;
+  if(statusNachtabsenkung==true)
+    LEDROT_ON;
+  else
+    LEDROT_OFF;
+}
+
+
+void jobGetHeaterOnValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  uint8_t adr = (uint8_t)address-48;
+  if(adr<NUMBER_OF_VENTS)
+    comRec->sendAnswerInt(function,address,job,u8HeatSwell[adr],true);
   else
     comRec->sendPureAnswer(function,address,job,false);
 }
 
-void jobGetHeater1HystValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+void jobGetHeaterHystValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
-  if(address<NUMBER_OF_VENTS)
-    comRec->sendAnswerInt(function,address,job,u8HeatHysterese[address],true);
+  uint8_t adr = (uint8_t)address-48;
+  if(adr<NUMBER_OF_VENTS)
+    comRec->sendAnswerInt(function,address,job,u8HeatHysterese[adr],true);
   else
     comRec->sendPureAnswer(function,address,job,false);
 }
 
 void jobGetHeaterSetStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
-  if(address<NUMBER_OF_VENTS)
-    cnet.sendStandard(heaterStatusStrings[u8HeatSetStatus[address]],BROADCAST,'L','1','s',true);
+  uint8_t adr = (uint8_t)address-48;
+  if(adr<NUMBER_OF_VENTS)
+    cnet.sendStandard(heaterStatusStrings[u8HeatSetStatus[adr]],BROADCAST,'V',address,'s',true);
   else
     comRec->sendPureAnswer(function,address,job,false);
 
@@ -64,29 +83,44 @@ void jobGetHeaterSetStatus(ComReceiver *comRec, char function,char address,char 
 
 void jobGetHeaterActualStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
-  if(address<NUMBER_OF_VENTS)
-    comRec->sendAnswer(heaterStatusStrings[u8HeatActualStatus[address]],'L','1','a',true);
+  uint8_t adr = (uint8_t)address-48;
+  if(adr<NUMBER_OF_VENTS)
+    comRec->sendAnswer(heaterStatusStrings[u8HeatActualStatus[adr]],'V',address,'a',true);
   else
     comRec->sendPureAnswer(function,address,job,false);
 }
 
-void jobSetHeater1OnValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+void jobSetHeaterOnValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
-  if(address<NUMBER_OF_VENTS)
+  uint8_t adr = (uint8_t)address-48;
+  if(adr<NUMBER_OF_VENTS)
   {
-    u8HeatSwell[address] = ( (uint8_t*) pMem )[0];
-    comRec->Getoutput()->broadcastUInt8(u8HeatSwell[address],function,address,job);
+    u8HeatSwell[adr] = ( (uint8_t*) pMem )[0];
+    comRec->Getoutput()->broadcastUInt8(u8HeatSwell[adr],function,address,job);
   }
   else
     comRec->sendPureAnswer(function,address,job,false);
 }
 
-void jobSetHeater1HystValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+void jobSetHeaterOnNightValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
-  if(address<NUMBER_OF_VENTS)
+  uint8_t adr = (uint8_t)address-48;
+  if(adr<NUMBER_OF_VENTS)
   {
-    u8HeatHysterese[address] = ( (uint8_t*) pMem )[0];
-    comRec->Getoutput()->broadcastUInt8(u8HeatHysterese[address],function,address,job);
+    u8HeatNightSwell[adr] = ( (uint8_t*) pMem )[0];
+    comRec->Getoutput()->broadcastUInt8(u8HeatNightSwell[adr],function,address,job);
+  }
+  else
+    comRec->sendPureAnswer(function,address,job,false);
+}
+
+void jobSetHeaterHystValue(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  uint8_t adr = (uint8_t)address-48;
+  if(adr<NUMBER_OF_VENTS)
+  {
+    u8HeatHysterese[adr] = ( (uint8_t*) pMem )[0];
+    comRec->Getoutput()->broadcastUInt8(u8HeatHysterese[adr],function,address,job);
   }
   else
     comRec->sendPureAnswer(function,address,job,false);
@@ -95,25 +129,26 @@ void jobSetHeater1HystValue(ComReceiver *comRec, char function,char address,char
 void jobSetHeaterSetStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
 char *temp;
+  uint8_t adr = ((uint8_t)address)-48;
 	temp = (char*) pMem;
-	if(address<NUMBER_OF_VENTS)
+	if(adr<NUMBER_OF_VENTS)
   {
     switch(temp[0])
     {
       case 'a':
-        u8HeatSetStatus[address] = HEAT_STATUS_OFF;
+        u8HeatSetStatus[adr] = HEAT_STATUS_OFF;
       break;
       case 'e':
-        u8HeatSetStatus[address] = HEAT_STATUS_ON;
+        u8HeatSetStatus[adr] = HEAT_STATUS_ON;
       break;
       case 'A':
-        u8HeatSetStatus[address] = HEAT_STATUS_AUTO;
+        u8HeatSetStatus[adr] = HEAT_STATUS_AUTO;
       break;
     }
-    reportHeatSetStatus(comRec->Getoutput(),address);
+    reportHeatSetStatus(comRec->Getoutput(),adr);
   }
   else
-    comRec->sendPureAnswer(function,address,job,false);
+    comRec->sendPureAnswer(function,adr+48,job,false);
 }
 
 void jobSetIDNumber(ComReceiver *comRec, char function,char address,char job, void * pMem)
@@ -220,12 +255,12 @@ void jobWaitAfterLastSensor(ComReceiver *comRec, char function,char address,char
 	comRec->sendAnswerInt(function,address,job,actWaitAfterLastSensor,true);
 }
 
-void reportHeatSetStatus(Communication *com, uint8_t address)
+void reportHeatSetStatus(Communication *com, uint8_t adr)
 {
-  com->sendStandard(heaterStatusStrings[u8HeatSetStatus[address]],BROADCAST,'V','1','s','T');
+  com->sendStandard(heaterStatusStrings[u8HeatSetStatus[adr]],BROADCAST,'V','0'+adr,'s','T');
 }
 
-void reportHeatActualStatus(Communication *com, uint8_t address)
+void reportHeatActualStatus(Communication *com, uint8_t adr)
 {
-  com->sendStandard(heaterStatusStrings[u8HeatActualStatus[address]],BROADCAST,'V','1','a','T');
+  com->sendStandard(heaterStatusStrings[u8HeatActualStatus[adr]],BROADCAST,'V','0'+adr,'a','T');
 }
