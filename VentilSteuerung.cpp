@@ -9,6 +9,7 @@
 
 void setup()
 {
+	_delay_ms(100); // gibt dem Schaltregler Zeit
   init_clock(SYSCLK,PLL,true,CLOCK_CALIBRATION);
 	PORTA_DIRSET = PIN2_bm | PIN3_bm | PIN4_bm;
 	PORTA_OUTSET = 0xff;
@@ -59,7 +60,7 @@ void setup()
 int main(void)
 {
 uint8_t reportStarted = false;
-static uint8_t DS18B20ToReport = 0;
+static uint8_t indexToReport = 0;
 
 	setup();
 
@@ -70,9 +71,12 @@ static uint8_t DS18B20ToReport = 0;
 	init_mytimer();
  	setup_twi();
 
+
 	uint8_t sensorReady=SENSOR_READY;
-	//MAX7328 maxTest(&twiE_Master,I2C_EXTENDER_ADDRESS);
-  //maxTest.newValue(0xff);
+	MAX7328 maxTest(&twiE_Master,I2C_EXTENDER_ADDRESS);
+  maxTest.newValue(0xff);
+  while(!TWI_MasterReady(&twiE_Master))
+    ;
 
   LEDGRUEN_ON;
 
@@ -106,14 +110,13 @@ static uint8_t DS18B20ToReport = 0;
       }
 
     }
-    /*
     // Setzen der Relais und der LEDs entsprechend des Heizungsstatus
     uint8_t outputs = 0xff;
-    switch(u8HeatActualStatus)
-    {
-    }
+    if(u8HeatActualStatus[0]==HEAT_STATUS_ON)
+      outputs ^= LED_RGB_BLUE | POWER_3;
+    if(u8HeatActualStatus[1]==HEAT_STATUS_ON)
+      outputs ^= LED_RGB_GREEN | POWER_2;
     maxTest.updateValue(outputs);
-    */
 
     // Falls sich der Heizungsstatus geändert, wird dieser gesendet
 		for( uint8_t i=0;i<NUMBER_OF_VENTS;i++)
@@ -184,24 +187,58 @@ static uint8_t DS18B20ToReport = 0;
             break;
 #endif // KLIMASENSOR
             case DS18B20REPORT:
-                if(actNumberSensors>0)
-                {
-                    sprintf(buffer,"%f",(double)(tempSensors[DS18B20ToReport]->getMeanTemperature()));
-                    cnet.sendStandard(buffer,BROADCAST,'T',int('a')+DS18B20ToReport,'t','F');
-                    DS18B20ToReport++;
-                }
-                else
-                {
-                    DS18B20ToReport=255;
-                }
-                if(DS18B20ToReport>=actNumberSensors)
-                {
-                    DS18B20ToReport = 0;
-                }
-                else
-                {
-                    statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Sensornummer abläuft
-                }
+              if(actNumberSensors>0)
+              {
+                sprintf(buffer,"%f",(double)(tempSensors[indexToReport]->getMeanTemperature()));
+                cnet.sendStandard(buffer,BROADCAST,'T',int('a')+indexToReport,'t','F');
+                indexToReport++;
+              }
+              else
+                indexToReport=255;
+              if(indexToReport>=actNumberSensors)
+                indexToReport = 0;
+              else
+                statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Sensornummer abläuft
+            break;
+            case HEAT_ACTUAL_STATUS_REPORT:
+              reportHeatActualStatus(&cnet,indexToReport);
+              indexToReport++;
+              if(indexToReport>=NUMBER_OF_VENTS)
+                indexToReport = 0;
+              else
+                statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Ventilnummer abläuft
+            break;
+            case HEAT_SET_STATUS_REPORT:
+              reportHeatSetStatus(&cnet,indexToReport);
+              indexToReport++;
+              if(indexToReport>=NUMBER_OF_VENTS)
+                indexToReport = 0;
+              else
+                statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Ventilnummer abläuft
+            break;
+            case HEAT_SWELL_REPORT:
+              cnet.broadcastUInt8(u8HeatSwell[indexToReport],'V','0'+indexToReport,'D');
+              indexToReport++;
+              if(indexToReport>=NUMBER_OF_VENTS)
+                indexToReport = 0;
+              else
+                statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Ventilnummer abläuft
+            break;
+            case HEAT_NIGHT_SWELL_REPORT:
+              cnet.broadcastUInt8(u8HeatNightSwell[indexToReport],'V','0'+indexToReport,'N');
+              indexToReport++;
+              if(indexToReport>=NUMBER_OF_VENTS)
+                indexToReport = 0;
+              else
+                statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Ventilnummer abläuft
+            break;
+            case HEAT_HYSTERESE_REPORT:
+              cnet.broadcastUInt8(u8HeatHysterese[indexToReport],'V','0'+indexToReport,'H');
+              indexToReport++;
+              if(indexToReport>=NUMBER_OF_VENTS)
+                indexToReport = 0;
+              else
+                statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Ventilnummer abläuft
             break;
             case LASTREPORT:
                 LEDGRUEN_OFF;

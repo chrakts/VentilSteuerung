@@ -54,3 +54,5 @@ bin/Release/VentilSteuerung.map
 bin/Release/VentilSteuerung.sig
 
 VentilSteuerung.cscope_file_list
+
+*.fuse4
