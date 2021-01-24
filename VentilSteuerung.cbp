@@ -17,10 +17,10 @@
 					<Add option="-Os" />
 					<Add option="-Wall" />
 					<Add option="-DNDEBUG" />
-					<Add option="-DF_CPU=32000000UL" />
+					<Add option="-DF_CPU=29491200UL" />
 					<Add option="-DSYSCLK=CLK32M" />
 					<Add option="-DPLL=0" />
-					<Add option="-DCLOCK_CALIBRATION=0x83" />
+					<Add option="-DCLOCK_CALIBRATION=90" />
 					<Add option="-DNODE_STRING=V1" />
 					<Add directory="./" />
 				</Compiler>
@@ -134,11 +134,11 @@
 		<Unit filename="External.h" />
 		<Unit filename="Globals.cpp" />
 		<Unit filename="LuefterHardware.h" />
-		<Unit filename="VentilSteuerung.cpp" />
-		<Unit filename="VentilSteuerung.h" />
 		<Unit filename="OneWire.h" />
 		<Unit filename="TempSensor.cpp" />
 		<Unit filename="TempSensor.h" />
+		<Unit filename="VentilSteuerung.cpp" />
+		<Unit filename="VentilSteuerung.h" />
 		<Unit filename="Wire.cpp" />
 		<Unit filename="Wire.h" />
 		<Unit filename="ledHardware.h" />
