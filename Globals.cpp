@@ -35,12 +35,13 @@ volatile double fTemperatur=-999,fHumidity=-999,fDewPoint=-999,fAbsHumitdity=-99
 
 
 
-volatile uint8_t u8HeatSwell[NUMBER_OF_VENTS],u8HeatNightSwell[NUMBER_OF_VENTS],u8HeatHysterese[NUMBER_OF_VENTS];
+volatile double fHeatSwell[NUMBER_OF_VENTS],fHeatNightSwell[NUMBER_OF_VENTS],fHeatHysterese[NUMBER_OF_VENTS];
 volatile uint8_t u8HeatSetStatus[NUMBER_OF_VENTS],u8HeatActualStatus[NUMBER_OF_VENTS],u8HeatActualStatusOld[NUMBER_OF_VENTS];
 
-volatile uint8_t u8oldHeatSwell[NUMBER_OF_VENTS],u8oldHeatNightSwell[NUMBER_OF_VENTS],u8oldHeatHysterese[NUMBER_OF_VENTS],u8oldHeatSetStatus[NUMBER_OF_VENTS];
+volatile double foldHeatSwell[NUMBER_OF_VENTS],foldHeatNightSwell[NUMBER_OF_VENTS],foldHeatHysterese[NUMBER_OF_VENTS];
+volatile uint8_t u8oldHeatSetStatus[NUMBER_OF_VENTS];
 
-uint8_t EEMEM ee_u8HeatSwell[NUMBER_OF_VENTS],ee_u8HeatNightSwell[NUMBER_OF_VENTS],ee_u8HeatHysterese[NUMBER_OF_VENTS];
+double EEMEM ee_fHeatSwell[NUMBER_OF_VENTS],ee_fHeatNightSwell[NUMBER_OF_VENTS],ee_fHeatHysterese[NUMBER_OF_VENTS];
 uint8_t EEMEM ee_u8FanSetStatus[NUMBER_OF_VENTS];
 
 

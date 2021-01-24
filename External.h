@@ -55,13 +55,14 @@ extern uint16_t actReportBetweenSensors;
 extern uint16_t actWaitAfterLastSensor;
 
 volatile extern double fTemperatur,fHumidity,fDewPoint,fAbsHumitdity;
-volatile extern uint8_t u8HeatSwell[NUMBER_OF_VENTS],u8HeatNightSwell[NUMBER_OF_VENTS],u8HeatHysterese[NUMBER_OF_VENTS];
+volatile extern double fHeatSwell[NUMBER_OF_VENTS],fHeatNightSwell[NUMBER_OF_VENTS],fHeatHysterese[NUMBER_OF_VENTS];
 volatile extern uint8_t u8HeatSetStatus[NUMBER_OF_VENTS],u8HeatActualStatus[NUMBER_OF_VENTS],u8HeatActualStatusOld[NUMBER_OF_VENTS];
 
-volatile extern uint8_t u8oldHeatSwell[NUMBER_OF_VENTS],u8oldHeatNightSwell[NUMBER_OF_VENTS],u8oldHeatHysterese[NUMBER_OF_VENTS],u8oldHeatSetStatus[NUMBER_OF_VENTS];
+volatile extern double foldHeatSwell[NUMBER_OF_VENTS],foldHeatNightSwell[NUMBER_OF_VENTS],foldHeatHysterese[NUMBER_OF_VENTS];
+volatile extern uint8_t u8oldHeatSetStatus[NUMBER_OF_VENTS];
 
 
-extern uint8_t EEMEM ee_u8HeatSwell[NUMBER_OF_VENTS],ee_u8HeatNightSwell[NUMBER_OF_VENTS],ee_u8HeatHysterese[NUMBER_OF_VENTS];
+extern double EEMEM ee_u8HeatSwell[NUMBER_OF_VENTS],ee_u8HeatNightSwell[NUMBER_OF_VENTS],ee_u8HeatHysterese[NUMBER_OF_VENTS];
 extern uint8_t EEMEM ee_u8HeatSetStatus[NUMBER_OF_VENTS];
 
 extern const char *fehler_text[];

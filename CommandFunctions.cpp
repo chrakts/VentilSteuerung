@@ -29,9 +29,9 @@ COMMAND cnetCommands[NUM_COMMANDS] =
 		{'C','a',CUSTOMER,NOPARAMETER,0,jobGetCAbsHumiditySensor},
 		{'V','a',CUSTOMER,NOPARAMETER,0,jobGetHeaterActualStatus},
 		{'V','s',CUSTOMER,NOPARAMETER,0,jobGetHeaterSetStatus},
-		{'V','D',CUSTOMER,UINT_8,1,jobSetHeaterOnValue},
-		{'V','N',CUSTOMER,UINT_8,1,jobSetHeaterOnNightValue},
-		{'V','H',CUSTOMER,UINT_8,1,jobSetHeaterHystValue},
+		{'V','D',CUSTOMER,FLOAT,1,jobSetHeaterOnValue},
+		{'V','N',CUSTOMER,FLOAT,1,jobSetHeaterOnNightValue},
+		{'V','H',CUSTOMER,FLOAT,1,jobSetHeaterHystValue},
 		{'V','S',CUSTOMER,STRING,8,jobSetHeaterSetStatus},
 		{'V','l',CUSTOMER,NOPARAMETER,0,jobGetHeaterOnValue},
 		{'V','h',CUSTOMER,NOPARAMETER,0,jobGetHeaterHystValue},
@@ -57,7 +57,7 @@ void jobGetHeaterOnValue(ComReceiver *comRec, char function,char address,char jo
 {
   uint8_t adr = (uint8_t)address-48;
   if(adr<NUMBER_OF_VENTS)
-    comRec->sendAnswerInt(function,address,job,u8HeatSwell[adr],true);
+    comRec->sendAnswerDouble(function,address,job,fHeatSwell[adr],true);
   else
     comRec->sendPureAnswer(function,address,job,false);
 }
@@ -66,7 +66,7 @@ void jobGetHeaterHystValue(ComReceiver *comRec, char function,char address,char 
 {
   uint8_t adr = (uint8_t)address-48;
   if(adr<NUMBER_OF_VENTS)
-    comRec->sendAnswerInt(function,address,job,u8HeatHysterese[adr],true);
+    comRec->sendAnswerDouble(function,address,job,fHeatHysterese[adr],true);
   else
     comRec->sendPureAnswer(function,address,job,false);
 }
@@ -95,8 +95,8 @@ void jobSetHeaterOnValue(ComReceiver *comRec, char function,char address,char jo
   uint8_t adr = (uint8_t)address-48;
   if(adr<NUMBER_OF_VENTS)
   {
-    u8HeatSwell[adr] = ( (uint8_t*) pMem )[0];
-    comRec->Getoutput()->broadcastUInt8(u8HeatSwell[adr],function,address,job);
+    fHeatSwell[adr] = ( (double*) pMem )[0];
+    comRec->Getoutput()->broadcastFloat(fHeatSwell[adr],function,address,job);
   }
   else
     comRec->sendPureAnswer(function,address,job,false);
@@ -107,8 +107,8 @@ void jobSetHeaterOnNightValue(ComReceiver *comRec, char function,char address,ch
   uint8_t adr = (uint8_t)address-48;
   if(adr<NUMBER_OF_VENTS)
   {
-    u8HeatNightSwell[adr] = ( (uint8_t*) pMem )[0];
-    comRec->Getoutput()->broadcastUInt8(u8HeatNightSwell[adr],function,address,job);
+    fHeatNightSwell[adr] = ( (double*) pMem )[0];
+    comRec->Getoutput()->broadcastFloat(fHeatNightSwell[adr],function,address,job);
   }
   else
     comRec->sendPureAnswer(function,address,job,false);
@@ -119,8 +119,8 @@ void jobSetHeaterHystValue(ComReceiver *comRec, char function,char address,char 
   uint8_t adr = (uint8_t)address-48;
   if(adr<NUMBER_OF_VENTS)
   {
-    u8HeatHysterese[adr] = ( (uint8_t*) pMem )[0];
-    comRec->Getoutput()->broadcastUInt8(u8HeatHysterese[adr],function,address,job);
+    fHeatHysterese[adr] = ( (double*) pMem )[0];
+    comRec->Getoutput()->broadcastFloat(fHeatHysterese[adr],function,address,job);
   }
   else
     comRec->sendPureAnswer(function,address,job,false);

@@ -9,7 +9,9 @@
 
 void setup()
 {
-	_delay_ms(100); // gibt dem Schaltregler Zeit
+	//_delay_ms(10); // gibt dem Schaltregler Zeit
+
+	// Achtung: Prozessor ist runtergetaktet auf knapp 30MHz
   init_clock(SYSCLK,PLL,true,CLOCK_CALIBRATION);
 	PORTA_DIRSET = PIN2_bm | PIN3_bm | PIN4_bm;
 	PORTA_OUTSET = 0xff;
@@ -38,14 +40,14 @@ void setup()
 
   for(i=0;i<NUMBER_OF_VENTS;i++)
   {
-    u8HeatSwell[i]           = 35;
-    u8HeatNightSwell[i]      = 25;
-    u8HeatHysterese[i]       = 3;
+    fHeatSwell[i]           = 35.1;
+    fHeatNightSwell[i]      = 25.3;
+    fHeatHysterese[i]       = 3.4;
     u8HeatSetStatus[i]       = HEAT_STATUS_AUTO;
     u8HeatActualStatus[i]    = HEAT_STATUS_ON;
     u8HeatActualStatusOld[i] = HEAT_STATUS_UNVALID;
-    u8oldHeatSwell[i]        = -33;
-    u8oldHeatHysterese[i]    = -5;
+    foldHeatSwell[i]        = -33.5;
+    foldHeatHysterese[i]    = -5.4;
     u8oldHeatSetStatus[i]    = HEAT_STATUS_UNVALID;
   }
 
@@ -98,11 +100,11 @@ static uint8_t indexToReport = 0;
         u8HeatActualStatus[i] = u8HeatSetStatus[i];
       else // Heat = Auto
       {
-        uint8_t swell = u8HeatSwell[i];
+        double swell = fHeatSwell[i];
         if(statusNachtabsenkung)
-          swell = u8HeatNightSwell[i];
+          swell = fHeatNightSwell[i];
         if(u8HeatActualStatus[i]==HEAT_STATUS_ON)
-          swell += u8HeatHysterese[i];
+          swell += fHeatHysterese[i];
         if(tempSensors[i]->getMeanTemperature()>swell)
           u8HeatActualStatus[i]=HEAT_STATUS_OFF;
         else
@@ -217,7 +219,7 @@ static uint8_t indexToReport = 0;
                 statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Ventilnummer abläuft
             break;
             case HEAT_SWELL_REPORT:
-              cnet.broadcastUInt8(u8HeatSwell[indexToReport],'V','0'+indexToReport,'D');
+              cnet.broadcastDouble(fHeatSwell[indexToReport],'V','0'+indexToReport,'D');
               indexToReport++;
               if(indexToReport>=NUMBER_OF_VENTS)
                 indexToReport = 0;
@@ -225,7 +227,7 @@ static uint8_t indexToReport = 0;
                 statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Ventilnummer abläuft
             break;
             case HEAT_NIGHT_SWELL_REPORT:
-              cnet.broadcastUInt8(u8HeatNightSwell[indexToReport],'V','0'+indexToReport,'N');
+              cnet.broadcastDouble(fHeatNightSwell[indexToReport],'V','0'+indexToReport,'N');
               indexToReport++;
               if(indexToReport>=NUMBER_OF_VENTS)
                 indexToReport = 0;
@@ -233,7 +235,7 @@ static uint8_t indexToReport = 0;
                 statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Ventilnummer abläuft
             break;
             case HEAT_HYSTERESE_REPORT:
-              cnet.broadcastUInt8(u8HeatHysterese[indexToReport],'V','0'+indexToReport,'H');
+              cnet.broadcastDouble(fHeatHysterese[indexToReport],'V','0'+indexToReport,'H');
               indexToReport++;
               if(indexToReport>=NUMBER_OF_VENTS)
                 indexToReport = 0;
