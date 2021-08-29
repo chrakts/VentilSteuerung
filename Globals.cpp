@@ -41,8 +41,8 @@ volatile uint8_t u8HeatSetStatus[NUMBER_OF_VENTS],u8HeatActualStatus[NUMBER_OF_V
 volatile double foldHeatSwell[NUMBER_OF_VENTS],foldHeatNightSwell[NUMBER_OF_VENTS],foldHeatHysterese[NUMBER_OF_VENTS];
 volatile uint8_t u8oldHeatSetStatus[NUMBER_OF_VENTS];
 
-double EEMEM ee_fHeatSwell[NUMBER_OF_VENTS],ee_fHeatNightSwell[NUMBER_OF_VENTS],ee_fHeatHysterese[NUMBER_OF_VENTS];
-uint8_t EEMEM ee_u8FanSetStatus[NUMBER_OF_VENTS];
+float EEMEM ee_fHeatSwell[NUMBER_OF_VENTS],ee_fHeatNightSwell[NUMBER_OF_VENTS],ee_fHeatHysterese[NUMBER_OF_VENTS];
+uint8_t EEMEM ee_u8HeatSetStatus[NUMBER_OF_VENTS];
 
 
 volatile uint8_t statusSensoren = KLIMASENSOR;

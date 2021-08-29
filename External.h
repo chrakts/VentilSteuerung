@@ -62,7 +62,7 @@ volatile extern double foldHeatSwell[NUMBER_OF_VENTS],foldHeatNightSwell[NUMBER_
 volatile extern uint8_t u8oldHeatSetStatus[NUMBER_OF_VENTS];
 
 
-extern double EEMEM ee_u8HeatSwell[NUMBER_OF_VENTS],ee_u8HeatNightSwell[NUMBER_OF_VENTS],ee_u8HeatHysterese[NUMBER_OF_VENTS];
+extern float EEMEM ee_fHeatSwell[NUMBER_OF_VENTS],ee_fHeatNightSwell[NUMBER_OF_VENTS],ee_fHeatHysterese[NUMBER_OF_VENTS];
 extern uint8_t EEMEM ee_u8HeatSetStatus[NUMBER_OF_VENTS];
 
 extern const char *fehler_text[];
