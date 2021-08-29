@@ -80,7 +80,6 @@ static uint8_t indexToReport = 0;
   while(!TWI_MasterReady(&twiE_Master))
     ;
 
-  LEDGRUEN_ON;
 
 #ifdef KLIMASENSOR
   humiSensor.begin(&twiE_Master);
@@ -115,9 +114,13 @@ static uint8_t indexToReport = 0;
     // Setzen der Relais und der LEDs entsprechend des Heizungsstatus
     uint8_t outputs = 0xff;
     if(u8HeatActualStatus[0]==HEAT_STATUS_ON)
-      outputs ^= LED_RGB_BLUE | POWER_3;
-    if(u8HeatActualStatus[1]==HEAT_STATUS_ON)
-      outputs ^= LED_RGB_GREEN | POWER_2;
+      outputs ^= LED_RGB_RED | POWER_2;
+    if(u8HeatActualStatus[1]==HEAT_STATUS_OFF) // Flurschalter ist invertiert
+      outputs ^= POWER_3;
+    else
+      outputs ^= LED_RGB_GREEN;
+    if(statusNachtabsenkung==true)
+      outputs ^= LED_RGB_BLUE;
     maxTest.updateValue(outputs);
 
     // Falls sich der Heizungsstatus geändert, wird dieser gesendet
@@ -243,11 +246,11 @@ static uint8_t indexToReport = 0;
                 statusReport--; // damit wird erreicht, dass der gleiche Report mit neuer Ventilnummer abläuft
             break;
             case LASTREPORT:
-                LEDGRUEN_OFF;
                 MyTimers[TIMER_REPORT].value = actReportBetweenBlocks;
                 MyTimers[TIMER_REPORT].state = TM_START;
             break;
         }
+        LEDGRUEN_OFF;
     }
 /*
     if( (u8oldF1Swell      != u8F1Swell     ) |
@@ -445,21 +448,23 @@ void buffer_rom_id(char *buffer,OneWire::RomId & romId)
 }
 
 void readEEData()
-{/*
+{
   for(uint8_t i=0;i<NUMBER_OF_VENTS;i++)
   {
-    u8HeatSwell[i]      = eeprom_read_byte(&(ee_u8HeatSwell[i]));
-    u8HeatHysterese[i]  = eeprom_read_byte(&(ee_u8HeatHysterese[i]));
+    fHeatSwell[i]      = eeprom_read_float(&(ee_fHeatSwell[i]));
+    fHeatNightSwell[i]      = eeprom_read_float(&(ee_fHeatNightSwell[i]));
+    fHeatHysterese[i]  = eeprom_read_float(&(ee_fHeatHysterese[i]));
     u8HeatSetStatus[i]  = eeprom_read_byte(&(ee_u8HeatSetStatus[i]));
-    u8oldHeatSwell[i]      = u8HeatSwell[i]    ;
-    u8oldHeatHysterese[i]  = u8HeatHysterese[i];
+    foldHeatSwell[i]      = fHeatSwell[i]    ;
+    foldHeatNightSwell[i]      = fHeatNightSwell[i]    ;
+    foldHeatHysterese[i]  = fHeatHysterese[i];
     u8oldHeatSetStatus[i]  = u8HeatSetStatus[i];
-  }*/
+  }
 }
 
 void writeEEData()
 {
-  LEDGRUEN_ON;
+  LEDROT_ON;
 	MyTimers[TIMER_SAVE_DELAY].state = TM_START; // Speicherverzögerung läuft los
 }
 
