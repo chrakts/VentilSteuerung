@@ -46,10 +46,6 @@ void gotStatusNachtabsenkung()
 	  statusNachtabsenkung = true;
   else
 	  statusNachtabsenkung = false;
-  if(statusNachtabsenkung==true)
-    LEDROT_ON;
-  else
-    LEDROT_OFF;
 }
 
 
