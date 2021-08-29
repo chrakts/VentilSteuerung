@@ -69,19 +69,21 @@ void nextTemperatureStatus(uint8_t test)
 }
 
 void nowSaveEEProm(uint8_t test)
-{/*
+{
   for(uint8_t i=0;i<NUMBER_OF_VENTS;i++)
   {
-    eeprom_update_byte(&ee_u8HeatSwell[i],u8HeatSwell[i]);
-    eeprom_update_byte(&ee_u8HeatHysterese[i],u8HeatHysterese[i]);
+    eeprom_update_float(&ee_fHeatSwell[i],fHeatSwell[i]);
+    eeprom_update_float(&ee_fHeatNightSwell[i],fHeatNightSwell[i]);
+    eeprom_update_float(&ee_fHeatHysterese[i],fHeatHysterese[i]);
     eeprom_update_byte(&ee_u8HeatSetStatus[i],u8HeatSetStatus[i]);
   }
-  LEDGRUEN_OFF;*/
+  LEDROT_OFF;
 }
 
 
 void nextReportStatus(uint8_t test)
 {
+  LEDGRUEN_ON;
 	sendStatusReport = true;
 	statusReport+=1;
 	if( statusReport > LASTREPORT )
