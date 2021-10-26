@@ -115,10 +115,8 @@ static uint8_t indexToReport = 0;
     uint8_t outputs = 0xff;
     if(u8HeatActualStatus[0]==HEAT_STATUS_ON)
       outputs ^= LED_RGB_RED | POWER_2;
-    if(u8HeatActualStatus[1]==HEAT_STATUS_OFF) // Flurschalter ist invertiert
-      outputs ^= POWER_3;
-    else
-      outputs ^= LED_RGB_GREEN;
+    if(u8HeatActualStatus[1]==HEAT_STATUS_ON) // Flurschalter ist nicht invertiert
+      outputs ^= LED_RGB_GREEN | POWER_3;
     if(statusNachtabsenkung==true)
       outputs ^= LED_RGB_BLUE;
     maxTest.updateValue(outputs);

@@ -31,7 +31,7 @@
 #include "twi_master_driver.h"
 #include "shtc3.h"
 #include "TempSensor.h"
-
+#include "twi_master_driver.h"
 #include "myTimers.h"
 
 using namespace OneWire;
