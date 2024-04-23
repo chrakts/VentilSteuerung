@@ -462,7 +462,7 @@ void readEEData()
 
 void writeEEData()
 {
-  LEDROT_ON;
+  LEDBLAU_ON;
 	MyTimers[TIMER_SAVE_DELAY].state = TM_START; // Speicherverzögerung läuft los
 }
 
